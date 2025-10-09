@@ -12,6 +12,9 @@ DATABASE_PORT=27017
 DATABASE_USERNAME=root
 DATABASE_PASSWORD=secret
 DATABASE_NAME=api
+# when run in docker use mongo as hostname
+# DATABASE_URL=mongodb://mongo:27017
+#  when not running in docker use localhost or 127.0.0.1
 DATABASE_URL=mongodb://mongo:27017
 
 # Redis -hiepnh add

@@ -25,6 +25,9 @@ import { Session } from '../session/domain/session';
 import { SessionService } from '../session/session.service';
 import { StatusEnum } from '../statuses/statuses.enum';
 import { User } from '../users/domain/user';
+import { AuthProvidersEnum } from '../auth/auth-providers.enum';
+import { JwtPayloadType } from '../auth/strategies/types/jwt-payload.type';
+import { JwtRefreshPayloadType } from '../auth/strategies/types/jwt-refresh-payload.type';
 
 @Injectable()
 export class AuthLocalService {
@@ -48,7 +51,7 @@ export class AuthLocalService {
       });
     }
 
-    if (user.provider !== AuthLocalProvidersEnum.email) {
+    if (user.provider !== AuthProvidersEnum.email) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {

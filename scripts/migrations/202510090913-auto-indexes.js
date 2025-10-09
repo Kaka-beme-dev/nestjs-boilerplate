@@ -15,12 +15,7 @@ module.exports = {
         { email: 1 },
         { unique: true, sparse: true, background: true },
       );
-    await db
-      .collection('users')
-      .createIndex(
-        { username: 1 },
-        { unique: true, sparse: true, background: true },
-      );
+    // await db.collection("users").createIndex({"username":1}, {"unique":true,"sparse":true,"background":true});
     await db
       .collection('users')
       .createIndex(

@@ -5,6 +5,7 @@ import { EntityDocumentHelper } from '../../../../../utils/document-entity-helpe
 export type FileSchemaDocument = HydratedDocument<FileSchemaClass>;
 
 @Schema({
+  collection: 'file',
   toJSON: {
     virtuals: true,
     getters: true,
