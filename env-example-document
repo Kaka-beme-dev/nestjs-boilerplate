@@ -14,6 +14,13 @@ DATABASE_PASSWORD=secret
 DATABASE_NAME=api
 DATABASE_URL=mongodb://mongo:27017
 
+# Redis -hiepnh add
+#  neu dung specific char liej @! terong pwd thi can url encode (@ =>  %40)
+REDIS_HOST=redis  #use in docker with service, if not docker use ip address
+REDIS_PORT=6379
+REDIS_PASS=Khongquen%40167
+REDIS_DB=authen-redis
+
 # Support "local", "s3", "s3-presigned"
 FILE_DRIVER=local
 ACCESS_KEY_ID=

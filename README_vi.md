@@ -27,4 +27,3 @@ Run app in dev mode
 
 yarn start:dev
 Open http://localhost:3000
-

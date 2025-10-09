@@ -19,9 +19,15 @@ export type UserSchemaDocument = HydratedDocument<UserSchemaClass>;
 export class UserSchemaClass extends EntityDocumentHelper {
   @Prop({
     type: String,
-    unique: true,
+    // unique: true,
+    // sparse: true, // ✅ Cho phép nhiều doc null email
   })
   email: string | null;
+
+  @Prop({
+    type: String,
+  })
+  username: string | null;
 
   @Prop()
   password?: string;
@@ -75,3 +81,14 @@ export class UserSchemaClass extends EntityDocumentHelper {
 export const UserSchema = SchemaFactory.createForClass(UserSchemaClass);
 
 UserSchema.index({ 'role._id': 1 });
+// ✅ Indexes hiephn add
+//{ sparse: true } => MongoDB chỉ tạo index cho những document có giá trị thật (không null hoặc không bị thiếu field đó).
+UserSchema.index({ email: 1 }, { unique: true, sparse: true });
+UserSchema.index({ username: 1 }, { unique: true, sparse: true });
+UserSchema.index({ provider: 1, socialId: 1 }, { unique: true, sparse: true });
+UserSchema.index({ 'status._id': 1 });
+//chỉ index những document có deletedAt=null, nếu soft delete thì không index(deletedAt!=null)
+UserSchema.index(
+  { deletedAt: 1 },
+  { partialFilterExpression: { deletedAt: null } },
+);
