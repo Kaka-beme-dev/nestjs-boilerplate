@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import bcrypt from 'bcryptjs';
+// import bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { RoleEnum } from '../../../../roles/roles.enum';
 import { StatusEnum } from '../../../../statuses/statuses.enum';
@@ -15,15 +15,16 @@ export class UserSeedService {
 
   async run() {
     const admin = await this.model.findOne({
-      email: 'admin@example.com',
+      email: 'hiepnh8923@gmail.com',
     });
 
     if (!admin) {
-      const salt = await bcrypt.genSalt();
-      const password = await bcrypt.hash('secret', salt);
+      /* const salt = await bcrypt.genSalt();
+      await bcrypt.hash('secret', salt); */
+      const password = 'Khongquen@167';
 
       const data = new this.model({
-        email: 'admin@example.com',
+        email: 'hiepnh8923@gmail.com',
         password: password,
         firstName: 'Super',
         lastName: 'Admin',
@@ -37,28 +38,28 @@ export class UserSeedService {
       await data.save();
     }
 
-    const user = await this.model.findOne({
-      email: 'john.doe@example.com',
-    });
-
-    if (!user) {
-      const salt = await bcrypt.genSalt();
-      const password = await bcrypt.hash('secret', salt);
-
-      const data = new this.model({
-        email: 'john.doe@example.com',
-        password: password,
-        firstName: 'John',
-        lastName: 'Doe',
-        role: {
-          _id: RoleEnum.user.toString(),
-        },
-        status: {
-          _id: StatusEnum.active.toString(),
-        },
-      });
-
-      await data.save();
-    }
+    /*     const user = await this.model.findOne({
+          email: 'john.doe@example.com',
+        });
+    
+        if (!user) {
+          const salt = await bcrypt.genSalt();
+          const password = await bcrypt.hash('secret', salt);
+    
+          const data = new this.model({
+            email: 'john.doe@example.com',
+            password: password,
+            firstName: 'John',
+            lastName: 'Doe',
+            role: {
+              _id: RoleEnum.user.toString(),
+            },
+            status: {
+              _id: StatusEnum.active.toString(),
+            },
+          });
+    
+          await data.save();
+        } */
   }
 }
