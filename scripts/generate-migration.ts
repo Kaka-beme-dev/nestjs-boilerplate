@@ -1,31 +1,37 @@
-// scripts/generate-migration.ts
+import 'reflect-metadata';
 import * as fs from 'fs';
 import * as path from 'path';
 import glob from 'fast-glob';
-import mongoose, { Schema } from 'mongoose';
+import { Schema } from 'mongoose';
+// import { getMetadataArgsStorage } from 'typeorm';
 
 const SCHEMA_GLOB = 'src/**/*.schema.ts';
-// const MIGRATION_DIR = path.resolve('migrations');
 const MIGRATION_DIR = path.resolve(__dirname, './migrations');
 
 function nowStr() {
+  // return new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 12);
   const d = new Date();
-  return d
-    .toISOString()
-    .replace(/[-:.TZ]/g, '')
-    .slice(0, 12);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0'); // 01-12
+  const dd = String(d.getDate()).padStart(2, '0');      // 01-31
+  const hh = String(d.getHours()).padStart(2, '0');     // 00-23
+  const min = String(d.getMinutes()).padStart(2, '0');  // 00-59
+  const ss = String(d.getSeconds()).padStart(2, '0');   // 00-59
+  return `${yyyy}_${mm}_${dd}_${hh}_${min}_${ss}`;
 }
 
-// Simple pluralize helper
 function pluralize(name: string) {
   return name.endsWith('s') ? name : `${name}s`;
 }
 
+function migrationIndexName(keys: Record<string, any>) {
+  return `migration_${nowStr()}_${Object.keys(keys).join('_')}`;
+}
+
 (async () => {
-  console.log('🔍 Scanning for schema files...');
   const files = await glob(SCHEMA_GLOB);
   if (!files.length) {
-    console.warn('⚠️  No schema files found.');
+    console.warn('⚠️ No schema files found.');
     process.exit(0);
   }
 
@@ -36,52 +42,70 @@ function pluralize(name: string) {
   const filePath = path.join(MIGRATION_DIR, fileName);
 
   let content = `module.exports = {
-  async up(db, client) {
-`;
+  async up(db, client) {\n`;
+
+  const downContent: string[] = [];
 
   for (const file of files) {
     const absPath = path.resolve(file);
     const mod = await import(absPath);
 
-    // Find all Mongoose Schema exports
-    // const schemaEntries = Object.entries(mod).filter(([_, val]) => val instanceof Schema);
     const schemaEntries: [string, any][] = Object.entries(mod).filter(
-      ([_, val]) => val instanceof Schema,
+      ([_, val]) => val instanceof Schema
     );
 
     for (const [exportName, schema] of schemaEntries) {
-      // Detect collection name
-      let collectionName: string | undefined;
-
-      // Priority 1: explicitly set via @Schema({ collection })
-      if (schema.get('collection')) {
-        collectionName = schema.get('collection');
-      } else {
-        // Priority 2: infer from export name (e.g. "UserSchema" -> "users")
-        collectionName = pluralize(
-          exportName.replace(/Schema$/i, '').toLowerCase(),
-        );
+      let collectionName = schema.get('collection');
+      if (!collectionName) {
+        collectionName = pluralize(exportName.replace(/Schema$/i, '').toLowerCase());
       }
 
-      const indexes = schema.indexes();
+      const indexes: [Record<string, any>, any][] = [];
+
+      // 1️⃣ Lấy index từ schema.indexes()
+      indexes.push(...schema.indexes());
+
+      // 2️⃣ Lấy index từ @Prop({ unique: true }) → convert thành index
+      const paths = Object.keys(schema.paths);
+      for (const p of paths) {
+        const pathOptions = schema.paths[p].options;
+        if (pathOptions.unique) {
+          indexes.push([{ [p]: 1 }, { unique: true }]);
+        }
+      }
+
       if (!indexes.length) continue;
 
-      content += `\n    // ${collectionName} indexes from ${path.basename(file)}\n`;
+      content += `\n    // Indexes for ${collectionName}\n`;
+
       for (const [keys, options] of indexes) {
-        content += `    await db.collection("${collectionName}").createIndex(${JSON.stringify(
-          keys,
-        )}, ${JSON.stringify(options)});\n`;
+        const idxName = migrationIndexName(keys);
+
+        // Block scope để tránh duplicate const
+        content += `    {\n`;
+        content += `      const existingIndexes = await db.collection("${collectionName}").indexes();\n`;
+        content += `      if (!existingIndexes.some(idx => JSON.stringify(idx.key) === '${JSON.stringify(
+          keys
+        )}')) {\n`;
+        content += `        await db.collection("${collectionName}").createIndex(${JSON.stringify(
+          keys
+        )}, {...${JSON.stringify(options)}, name: "${idxName}"});\n`;
+        content += `        console.log("Created migration index: ${idxName}");\n`;
+        content += `      } else { console.log("Index exists, skip"); }\n`;
+        content += `    }\n`;
+
+        downContent.push(
+          `    await db.collection("${collectionName}").dropIndex("${idxName}").catch(()=>{});`
+        );
       }
     }
   }
 
-  content += `
-  },
-  async down(db, client) {
-    console.log("Rollback not implemented (auto-generated)");
-  }
-};`;
+  content += `  },
+  async down(db, client) {\n`;
+  content += downContent.join('\n');
+  content += `\n  }\n};\n`;
 
-  fs.writeFileSync(filePath, content.trim());
+  fs.writeFileSync(filePath, content);
   console.log(`✅ Migration file created: ${fileName}`);
 })();
