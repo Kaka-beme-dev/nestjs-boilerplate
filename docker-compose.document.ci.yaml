@@ -5,26 +5,93 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - authen-mongo-db:/data/db
     expose:
-      - 27017
+      # - 27017
+      - ${DATABASE_PORT}
+      # ports for test dev only and migrate, production should not expose database port
+    ports:
+      - ${DATABASE_PORT}:${DATABASE_PORT}  
+    networks:
+      - authen-backend
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:  #dev test only
+      - 8081:8081
+    expose:
+      - 8081
+    # env_file:
+    #   - .env.production 
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: ${DATABASE_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${DATABASE_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@mongo:${DATABASE_PORT}/
+    networks:
+      - authen-backend    
 
   maildev:
     build:
       context: .
       dockerfile: maildev.Dockerfile
     expose:
-      - 1080
-      - 1025
+      - ${MAIL_CLIENT_PORT}
+    ports:
+      # - ${MAIL_CLIENT_PORT}:1080
+      - ${MAIL_PORT}:1025 # SMTP clients connect directly, must not thorough nginx
+    networks:
+      - authen-backend
 
   # Uncomment to use redis
-  # redis:
-  #   image: redis:7-alpine
-  #   expose:
-  #     - 6379
+  redis:
+    image: redis:7-alpine
+    expose:
+      - 6379
+    restart: always
+    networks:
+      - authen-backend
 
   api:
     build:
       context: .
-      dockerfile: document.e2e.Dockerfile
+      dockerfile: document.ci.Dockerfile
     env_file:
-      - env-example-document
+      - .env.production 
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    # links:
+    #   - mongo
+    depends_on:
+      - redis
+    networks:
+      - authen-backend
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: nginx.Dockerfile
+    environment:
+      - APP_PORT=${APP_PORT}  
+    ports:
+      # - "80:80"
+      - "55480:443" #also need change in nginx/conf.d/default.conf add port 55480
+    # user: "1004:1004" # user hiepnh in cloud ai vtc
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro # read-only vhosts
+      - ./nginx/html:/usr/share/nginx/html:ro # read-only HTML files
+      # - ./nginx/logs:/var/log/nginx # writable logs
+      - nginx-ssl-certs:/etc/nginx/ssl:rw # for change cert not need re rerun docker compose,only docker exec authen-nginx nginx -s reload
+    # restart: always
+    depends_on:
+      - api
+    networks:
+      - authen-backend
+
+volumes:
+  authen-mongo-db:
+  nginx-ssl-certs:
+
+networks:
+  authen-backend:

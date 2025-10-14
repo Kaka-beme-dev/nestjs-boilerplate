@@ -19,6 +19,7 @@ RUN sed -i 's/\r//g' /opt/startup.document.ci.sh
 WORKDIR /usr/src/app
 #➡️ Clear env để tránh lộ thông tin nhạy cảm trong image
 RUN echo "" > .env
+# RUN if [ ! -f .env ]; then cp env-example-document .env; fi
 RUN npm run build
 
 CMD ["/opt/startup.document.ci.sh"]

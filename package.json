@@ -31,9 +31,14 @@
     "release": "release-it",
     "migration:generate": "ts-node scripts/generate-migration.ts",
     "migrate:up": "ts-node scripts/run-migrations.ts up",
-    "migrate:rollback": "ts-node scripts/run-migrations.ts down"
+    "migrate:rollback": "ts-node scripts/run-migrations.ts down",
+    "publish:ci":"docker compose -p authen-ci -f docker-compose.document.ci.yaml up -d",
+    "publish:ci_clean":"docker compose -p authen-ci -f docker-compose.document.ci.yaml build --no-cache && docker compose -p authen-ci -f docker-compose.document.ci.yaml up -d",
+    "ci_logs":"docker compose -p authen-ci -f docker-compose.document.ci.yaml logs",
+    "ci_log_api":"docker logs -f authen-ci-api-1"
   },
   "dependencies": {
+    "@aws-sdk/abort-controller": "^3.374.0",
     "@aws-sdk/client-s3": "3.864.0",
     "@aws-sdk/s3-request-presigner": "3.864.0",
     "@nestjs/common": "11.1.6",

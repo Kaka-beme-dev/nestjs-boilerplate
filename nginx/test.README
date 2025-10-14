@@ -1,0 +1,9 @@
+✅ Self-Signed SSL (Optional for testing) IN ROOT PROJECT WITH CMD
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nginx/ssl/key.pem -out nginx/ssl/cert.pem -subj "/CN=localhost"
+
+or download from
+CloudFlare->SSL/TLS->OriginServer-> donwload
+
+api.example.com must be a valid DNS record pointing to your server's public IP.
+Or you can fake it in /etc/hosts (for testing)
+127.0.0.1 api.example.com

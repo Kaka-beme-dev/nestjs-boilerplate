@@ -83,8 +83,11 @@ function migrationIndexName(keys: Record<string, any>) {
 
         // Block scope để tránh duplicate const
         content += `    {\n`;
-        content += `      const existingIndexes = await db.collection("${collectionName}").indexes();\n`;
-        content += `      if (!existingIndexes.some(idx => JSON.stringify(idx.key) === '${JSON.stringify(
+        content += `      const existingCollection = await db.listCollections({ name: "${collectionName}"}).toArray();\n`;
+        content += `      const exists = existingCollection.length > 0;\n`;
+
+        content += `      const existingIndexes = exists == false ? null : await db.collection("${collectionName}").indexes();\n`;
+        content += `      if (existingIndexes && !existingIndexes.some(idx => JSON.stringify(idx.key) === '${JSON.stringify(
           keys
         )}')) {\n`;
         content += `        await db.collection("${collectionName}").createIndex(${JSON.stringify(
