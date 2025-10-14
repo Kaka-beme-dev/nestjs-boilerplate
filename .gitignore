@@ -41,3 +41,4 @@ lerna-debug.log*
 .env.development
 /ormconfig.json
 .codegpt
+.github/ssh_help/servers.txt

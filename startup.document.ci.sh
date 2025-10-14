@@ -26,8 +26,9 @@ echo "🚀 StartUp CI  ==> Waiting for Redis..."
 
 
 
-echo "🚀 StartUp CI  ==> Starting NestJS authen app11..."
-npm run start:prod # > prod.log 2>&1   để ghi log ra file
+echo "🚀 StartUp CI  ==> Starting NestJS authen app..."
+ # > prod.log 2>&1   để ghi log ra file
+npm run start:prod  > prod.log 2>&1
 
 
 # /opt/wait-for-it.sh localhost:3000

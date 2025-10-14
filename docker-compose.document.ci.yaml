@@ -39,7 +39,7 @@ services:
     expose:
       - ${MAIL_CLIENT_PORT}
     ports:
-      # - ${MAIL_CLIENT_PORT}:1080
+      - ${MAIL_CLIENT_PORT}:1080 #dev enable for web client test only
       - ${MAIL_PORT}:1025 # SMTP clients connect directly, must not thorough nginx
     networks:
       - authen-backend

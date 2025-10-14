@@ -3,11 +3,12 @@ name: NestJS API CI
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+  # pull_request:
+  #   branches: [main]
 
 jobs:
-  build:
+  release:
+    if: contains(github.event.head_commit.message, 'publish ci')
     runs-on: ubuntu-latest
 
     steps:
@@ -16,8 +17,7 @@ jobs:
       # <database-document-block>
       - name: Run e2e tests for NestJS with Mongoose
         id: document
-        run: docker compose -f docker-compose.document.ci.yaml --env-file env-example-document -p ci-document up --build --exit-code-from api
-
+        run: docker compose -f docker-compose.document.ci.yaml --env-file .env.production -p authen-ci up --build --exit-code-from api
       - name: Copy prod.log from container to host
         if: ${{ failure() && steps.document.conclusion == 'failure' }}
         run: docker cp ci-document-api-1:/usr/src/app/prod.log .
@@ -29,3 +29,18 @@ jobs:
         with:
           name: prod-logs
           path: prod.log
+
+      # config trong https://github.com/vtconline/goPlaySDK-IOS/settings/secrets/actions
+      # get telegram token from https://t.me/BotFather
+      # get chat id from https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
+      - name: Notify Telegram
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          MESSAGE="✅Status: $STATUS ${{ steps.bump_version.outputs.new_tag }} Repo: [${{ github.repository }}](https://github.com/${{ github.repository }})"
+
+          echo "Message to be sent: $MESSAGE"
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="$MESSAGE" \
+            -d parse_mode=Markdown    
