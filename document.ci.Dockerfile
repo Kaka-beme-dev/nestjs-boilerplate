@@ -20,6 +20,14 @@ WORKDIR /usr/src/app
 #➡️ Clear env để tránh lộ thông tin nhạy cảm trong image
 RUN echo "" > .env
 # RUN if [ ! -f .env ]; then cp env-example-document .env; fi
-RUN npm run build
+# ✅ **THÊM DÒNG NÀY để đảm bảo thư mục dist tồn tại trước khi copy**
+RUN mkdir -p dist
+
+# ✅ **THAY ĐỔI DÒNG BUILD**
+# Vì bạn đang build trong Docker, phải đảm bảo build xảy ra *trong* thư mục /usr/src/app
+RUN npm run build --if-present || npx nest build || (echo "❌ Nest build failed!" && exit 1)
+
+# ✅ **THÊM DÒNG NÀY để kiểm tra file main đã build**
+# RUN test -f dist/main.js || (echo "❌ dist/main.js not found!" && ls -la dist && exit 1)
 
 CMD ["/opt/startup.document.ci.sh"]

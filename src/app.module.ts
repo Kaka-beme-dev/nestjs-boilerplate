@@ -53,7 +53,11 @@ const infrastructureDatabaseModule = MongooseModule.forRootAsync({
         fallbackLanguage: configService.getOrThrow('app.fallbackLanguage', {
           infer: true,
         }),
-        loaderOptions: { path: path.join(__dirname, '/i18n/'), watch: true },
+        loaderOptions: {
+          // path: path.join(__dirname, '/i18n/'), //cũ
+          path: path.join(process.cwd(), 'dist', 'i18n'),
+          watch: true,
+        },
       }),
       resolvers: [
         {

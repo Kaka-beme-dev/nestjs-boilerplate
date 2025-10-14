@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import {
   ClassSerializerInterceptor,
+  Logger,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { AppModule } from './app.module';
 import validationOptions from './utils/validation-options';
 import { AllConfigType } from './config/config.type';
 import { ResolvePromisesInterceptor } from './utils/serializer.interceptor';
+const logger = new Logger('NestApplication');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -54,6 +56,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(configService.getOrThrow('app.port', { infer: true }));
+  await app.listen(
+    configService.getOrThrow('app.port', { infer: true }),
+    async () => {
+      logger.log(
+        `=========== 🕵  Server️ running on ${await app.getUrl()} ${configService.getOrThrow('app.port', { infer: true })}  ===========‍`,
+      );
+    },
+  );
 }
 void bootstrap();
