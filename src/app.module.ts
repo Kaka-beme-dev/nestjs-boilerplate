@@ -42,11 +42,14 @@ const infrastructureDatabaseModule = MongooseModule.forRootAsync({
         googleConfig,
         appleConfig,
       ],
-      envFilePath: ['.env'],
+      envFilePath: [
+        process.env.NODE_ENV === 'production' ? '.env.production' : '.env',
+      ],
     }),
     infrastructureDatabaseModule,
     I18nModule.forRootAsync({
       useFactory: (configService: ConfigService<AllConfigType>) => ({
+        //APP_FALLBACK_LANGUAGE in .env
         fallbackLanguage: configService.getOrThrow('app.fallbackLanguage', {
           infer: true,
         }),
