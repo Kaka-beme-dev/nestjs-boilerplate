@@ -16,9 +16,10 @@ jobs:
 
       - name: Restore .env.production from GitHub Secret
         run: |
-          echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
+          cat <<'EOF' > .env.production
+          ${{ secrets.ENV_PRODUCTION }}
+          EOF
           echo "✅ Restored .env.production"
-          cat .env.production | sed 's/./*/g'  # optional: mask output
 
       # <database-document-block>
       - name: Run e2e tests for NestJS with Mongoose
