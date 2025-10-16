@@ -31,8 +31,8 @@ jobs:
       - name: Run tests
         run: docker ps  # Check running containers
 
-      - name: Show API Log
-        run: docker logs -f authen-ci-api-1
+      - name: Show API Log for 10s 
+        run: timeout 10s docker logs -f authen-ci-api-1
 
       - name: Copy prod.log from container to host
         if: ${{ failure() && steps.document.conclusion == 'failure' }}
