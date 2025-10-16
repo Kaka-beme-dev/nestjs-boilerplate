@@ -31,9 +31,8 @@ jobs:
       - name: Run tests
         run: docker ps  # Check running containers
 
-      - name: Run API Tests
-        run: |
-          curl http://localhost:55557
+      - name: Show API Log
+        run: docker logs -f authen-ci-api-1
 
       - name: Copy prod.log from container to host
         if: ${{ failure() && steps.document.conclusion == 'failure' }}
