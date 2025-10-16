@@ -27,7 +27,16 @@ jobs:
       # <database-document-block>
       - name: Run e2e tests for NestJS with Mongoose
         id: document
-        run: docker compose -f docker-compose.document.ci.yaml --env-file .env.production -p authen-ci up --build --exit-code-from api
+        # run: docker compose -f docker-compose.document.ci.yaml --env-file .env.production -p authen-ci up --build --exit-code-from api
+        run: docker compose -f docker-compose.document.ci.yaml --env-file .env.production -p authen-ci up --build -d # --exit-code-from api
+
+      - name: Run tests
+        run: docker ps  # Check running containers
+
+      - name: Run API Tests
+        run: |
+          curl http://authen-ci-api:3000/authenService/docs 
+
       - name: Copy prod.log from container to host
         if: ${{ failure() && steps.document.conclusion == 'failure' }}
         run: docker cp authen-ci-api-1:/usr/src/app/prod.log .
