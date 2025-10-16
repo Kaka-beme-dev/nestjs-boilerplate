@@ -26,4 +26,6 @@ yarn seed:run:document
 Run app in dev mode
 
 yarn start:dev
-Open http://localhost:3000
+Open http://localhost:55557
+
+
