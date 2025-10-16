@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e # Dừng script nếu có lệnh nào lỗi
-
+echo "🚀 StartUp CI  ==> begin"
 /opt/wait-for-it.sh mongo:27017
 
 

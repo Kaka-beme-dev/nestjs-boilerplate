@@ -21,6 +21,9 @@ jobs:
           EOF
           echo "✅ Restored .env.production"
 
+          echo "=====Starting nginx with generated config:"
+          cat .env.production
+
       # <database-document-block>
       - name: Run e2e tests for NestJS with Mongoose
         id: document
