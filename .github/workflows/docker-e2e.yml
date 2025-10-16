@@ -33,7 +33,7 @@ jobs:
 
       - name: Run API Tests
         run: |
-          curl http://authen-ci-api:55557
+          curl http://localhost:55557
 
       - name: Copy prod.log from container to host
         if: ${{ failure() && steps.document.conclusion == 'failure' }}
