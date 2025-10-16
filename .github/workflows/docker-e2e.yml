@@ -21,8 +21,6 @@ jobs:
           EOF
           echo "✅ Restored .env.production"
 
-          echo "=====Starting nginx with generated config:"
-          cat .env.production
 
       # <database-document-block>
       - name: Run e2e tests for NestJS with Mongoose
@@ -35,7 +33,7 @@ jobs:
 
       - name: Run API Tests
         run: |
-          curl http://authen-ci-api:3000/authenService/docs 
+          curl http://authen-ci-api:55557
 
       - name: Copy prod.log from container to host
         if: ${{ failure() && steps.document.conclusion == 'failure' }}
