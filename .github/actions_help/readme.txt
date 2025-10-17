@@ -1,6 +1,6 @@
 https://github.com/Kaka-beme-dev/nestjs-boilerplate/settings/actions/runners/new?arch=x64&os=linux
 
-./config.sh --url https://github.com/Kaka-beme-dev/nestjs-boilerplate --token BRMWGEDTLFW2KELMOCXPS23I6DC6C
+./config.sh --url https://github.com/Kaka-beme-dev/nestjs-boilerplate --token xxxxxxxx
 
 
 ko dùng ./run.sh mà start service 
